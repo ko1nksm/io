@@ -29,7 +29,8 @@ if [ "${IOWARMUP:-}" ]; then
 fi
 
 while IFS="$IFS:" read -r name value; do
-  case $name in (*[!a-zA-Z_]*) continue; esac
+  case $name in (*[!a-zA-Z0-9_]*) continue; esac
+  case $value in (*[!0-9]*) continue; esac
   eval "io_${name}=\$value"
 done < /proc/$$/io
 
@@ -37,7 +38,8 @@ done < /proc/$$/io
 
 echo >&2
 while IFS="$IFS:" read -r name value; do
-  case $name in (*[!a-zA-Z_]*) continue; esac
+  case $name in (*[!a-zA-Z0-9_]*) continue; esac
+  case $value in (*[!0-9]*) continue; esac
   echo "$name: $((value - io_${name}))"
 done < /proc/$$/io >&2
 
