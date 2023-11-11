@@ -3,6 +3,20 @@
 set -eu
 IFS=$(printf '\n\t') && TAB=${IFS#?} LF=${IFS%?} && IFS=" ${TAB}${LF}"
 
+case ${1:-} in
+  -h | --help)
+    echo "Usage: io [-h | --help] command [arguments]..."
+    echo ""
+    echo "Reads from storage are not accurate unless the cache is cleared."
+    echo "The environment variables IOCLEANUP and IOWARMUP can be used"
+    echo "to specify the commands to be used for cleanup and warnup."
+    echo ""
+    echo "e.g."
+    echo "  export IOCLEANUP='sudo sh -c \"echo 1 > /proc/sys/vm/drop_caches\"'"
+    echo "  export IOWARMUP='sort --version; cat --version'"
+    exit 0
+esac
+
 if [ ! -e "/proc/$$/io" ]; then
   echo "io: Not supported. The procfs (/proc/<PID>/io) is required."
   exit 1
@@ -14,13 +28,8 @@ if [ "${IOCLEANUP+x}" ]; then
     eval "$IOCLEANUP"
   fi
 else
-  echo "io: Reads from storage are not accurate unless the cache is" \
-    "cleared. The environment variables IOCLEANUP and IOWARMUP can be used" \
-    " to specify the commands to be used for cleanup and warnup."
-  echo "e.g."
-  echo "  export IOCLEANUP='sudo sh -c \"echo 1 > /proc/sys/vm/drop_caches\"'"
-  echo "  export IOWARMUP='sort --version; cat --version'"
-  echo ""
+  echo "io: The environment variables IOCLEANUP and IOWARMUP" \
+    "can be used to manage the cache."
 fi >&2
 
 if [ "${IOWARMUP:-}" ]; then
